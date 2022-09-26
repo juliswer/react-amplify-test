@@ -5,11 +5,13 @@ import { listTasks } from "./graphql/queries";
 import "./App.css";
 
 function App() {
-  const [tasks, setTasks] = useState([]);
-  const [task, setTask] = useState({
+  const initialState = {
     name: "",
     description: "",
-  });
+  };
+
+  const [tasks, setTasks] = useState([]);
+  const [task, setTask] = useState(initialState);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,18 +19,26 @@ function App() {
       const result = await API.graphql(
         graphqlOperation(createTask, { input: task })
       );
-      console.log(result);
+      if(result.data.createTask) {
+        alert("Created")
+      }
+      setTask(initialState);
     } catch (error) {
+      alert("Not Created")
       console.log(error);
     }
   };
 
   useEffect(() => {
     (async () => {
-      const result = await API.graphql(graphqlOperation(listTasks));
-      setTasks(result.data.listTasks.items);
+      try {
+        const result = await API.graphql(graphqlOperation(listTasks));
+        setTasks(result.data.listTasks.items);
+      } catch (error) {
+        console.log(error);
+      }
     })();
-  }, []);
+  }, [tasks]);
 
   return (
     <>

@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { API, graphqlOperation } from "aws-amplify";
 import { createTask } from "./graphql/mutations";
+import { withAuthenticator, Button, Heading } from "@aws-amplify/ui-react";
+import "@aws-amplify/ui-react/styles.css";
 import { listTasks } from "./graphql/queries";
 import "./App.css";
 
-function App() {
+function App({ signOut, user }) {
   const initialState = {
     name: "",
     description: "",
@@ -19,12 +21,12 @@ function App() {
       const result = await API.graphql(
         graphqlOperation(createTask, { input: task })
       );
-      if(result.data.createTask) {
-        alert("Created")
+      if (result.data.createTask) {
+        alert("Created");
       }
       setTask(initialState);
     } catch (error) {
-      alert("Not Created")
+      alert("Not Created");
       console.log(error);
     }
   };
@@ -42,6 +44,7 @@ function App() {
 
   return (
     <>
+      <Heading level={1}>Hello {user.username}</Heading>
       <form onSubmit={handleSubmit}>
         <input
           type="text"
@@ -59,13 +62,14 @@ function App() {
       {tasks.map((task) => {
         return (
           <div key={task.id}>
-            <h2>{task.name}</h2>
-            <p>{task.description}</p>
+            <pre style={{ fontWeight: "bold" }}>{task.name}</pre>
+            <pre>{task.description}</pre>
           </div>
         );
       })}
+      <Button onClick={signOut}>SignOut</Button>
     </>
   );
 }
 
-export default App;
+export default withAuthenticator(App);
